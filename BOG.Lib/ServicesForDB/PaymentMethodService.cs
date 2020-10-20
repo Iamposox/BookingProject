@@ -10,24 +10,25 @@ using System.Threading.Tasks;
 
 namespace BOG.Lib.Services
 {
-    public class PaymentMethodService: IDataStore<PaymentMethod>
+    public class PaymentMethodService : IDataStore<PaymentMethod>
     {
         private readonly Context _context;
-        public PaymentMethodService(Context context)
-        {
-            _context = context;
-        }
+        public PaymentMethodService(Context context) => _context = context;
         public async Task<bool> UpdateItemAsync(PaymentMethod _item)
         {
-            var entry = _context.Set<PaymentMethod>()
-                         .Local
-                         .FirstOrDefault(f => f.ID == _item.ID);
-            if (entry != null)
-            {
-                _context.Entry(entry).State = EntityState.Detached;
+            try {
+                var entry = _context.Set<PaymentMethod>()
+                             .Local
+                             .FirstOrDefault(f => f.ID == _item.ID);
+                if (entry != null)
+                    _context.Entry(entry).State = EntityState.Detached;
+                _context.Entry(_item).State = EntityState.Modified;
+                return await _context.SaveChangesAsync() > 0;
             }
-            _context.Entry(_item).State = EntityState.Modified;
-            return await _context.SaveChangesAsync() > 0;
+            catch(DbUpdateConcurrencyException ex)
+            {
+                return false;
+            }
         }
         public async Task<bool> AddItemAsync(PaymentMethod _item)
         {
@@ -42,8 +43,10 @@ namespace BOG.Lib.Services
             }
             return true;
         }
-        public async Task<PaymentMethod> GetItemAsync(int _id) => await _context.PaymentMethods.SingleOrDefaultAsync(x => x.ID == _id);
-        public async Task<IEnumerable<PaymentMethod>> GetItemsAsync(bool forceRefresh = false) => await _context.PaymentMethods.ToListAsync();
+        public async Task<PaymentMethod> GetItemAsync(int _id) 
+            => await _context.PaymentMethods.SingleOrDefaultAsync(x => x.ID == _id);
+        public async Task<IEnumerable<PaymentMethod>> GetItemsAsync(bool forceRefresh = false) 
+            => await _context.PaymentMethods.ToListAsync();
 
     }
 }

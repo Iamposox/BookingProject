@@ -12,7 +12,6 @@ namespace BOG.Tests
     public class ReservedServiceTest
     {
         private ReservedService service;
-        public ReservedServiceTest() { }
         [TestInitialize]
         public void Init() => service = new ReservedService(new TestingContextDB());
         [TestCleanup]
@@ -22,26 +21,23 @@ namespace BOG.Tests
             Db.Database.EnsureDeleted();
         }
         [TestMethod]
-        public void GetCustomerService_Test()
+        public void GetReservedListService_Test()
         {
             var result = service.GetItemsAsync().GetAwaiter().GetResult();
-            Assert.AreEqual(result.GetType(), new List<Reserved>().GetType());
+            Assert.AreEqual(typeof(List<Reserved>), result.GetType());
         }
         [TestMethod]
-        public void GetOneCustomerService_Test()
+        public void GetOneReservedService_Test()
         {
             var result = service.GetItemAsync(1).GetAwaiter().GetResult();
-            Assert.AreEqual(result.AvailableProduct.Product.Name, "IPhone 12");
+            Assert.AreEqual("IPhone 12", result.Product.Name);
         }
         [TestMethod]
-        public void AddCustomerService_Test()
+        public void AddReservedService_Test()
         {
             Reserved reserved = new Reserved()
             {
-                AvailableProduct = new AvailableProduct() 
-                {
-                    Product = new Product()
-                },
+                Product = new Product(),
                 Booking = new Booking(),
                 Customer = new Customer() 
                 {
@@ -52,10 +48,10 @@ namespace BOG.Tests
             bool item = service.AddItemAsync(reserved).GetAwaiter().GetResult();
             Assert.IsTrue(item);
             var count = service.GetItemsAsync().GetAwaiter().GetResult().Count();
-            Assert.AreEqual(count, 2);
+            Assert.AreEqual(2, count);
         }
         [TestMethod]
-        public void UpdateCustomerService_Test()
+        public void UpdateReservedService_Test()
         {
             var reserved = service.GetItemAsync(1).GetAwaiter().GetResult();
             reserved.Booking.Statuc = true;

@@ -12,7 +12,6 @@ namespace BOG.Tests
     public class BookingServiceTest
     {
         private BookingService service;
-        public BookingServiceTest() { }
         [TestInitialize]
         public void Init() => service = new BookingService(new TestingContextDB());
         [TestCleanup]
@@ -22,19 +21,19 @@ namespace BOG.Tests
             Db.Database.EnsureDeleted();
         }
         [TestMethod]
-        public void GetCustomerService_Test()
+        public void GetBookingListService_Test()
         {
             var result = service.GetItemsAsync().GetAwaiter().GetResult();
-            Assert.AreEqual(result.GetType(), new List<Booking>().GetType());
+            Assert.AreEqual(typeof(List<Booking>),result.GetType());
         }
         [TestMethod]
-        public void GetOneCustomerService_Test()
+        public void GetOneBookingService_Test()
         {
             var result = service.GetItemAsync(1).GetAwaiter().GetResult();
-            Assert.AreEqual(result.Statuc, false);
+            Assert.AreEqual(false, result.Statuc);
         }
         [TestMethod]
-        public void AddCustomerService_Test()
+        public void AddBookingService_Test()
         {
             Booking booking = new Booking()
             {
@@ -43,10 +42,10 @@ namespace BOG.Tests
             bool item = service.AddItemAsync(booking).GetAwaiter().GetResult();
             Assert.IsTrue(item);
             var count = service.GetItemsAsync().GetAwaiter().GetResult().Count();
-            Assert.AreEqual(count, 3);
+            Assert.AreEqual(3, count);
         }
         [TestMethod]
-        public void UpdateCustomerService_Test()
+        public void UpdateBookingService_Test()
         {
             var customer = service.GetItemAsync(1).GetAwaiter().GetResult();
             customer.Statuc = true;

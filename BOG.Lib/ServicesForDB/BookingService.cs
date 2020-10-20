@@ -13,21 +13,23 @@ namespace BOG.Lib.Services
     public class BookingService:IDataStore<Booking>
     {
         private readonly Context _context;
-        public BookingService(Context context)
-        {
-            _context = context;
-        }
+        public BookingService(Context context) => _context = context;
         public async Task<bool> UpdateItemAsync(Booking _item)
         {
-            var entry = _context.Set<Booking>()
+            try
+            {
+                var entry = _context.Set<Booking>()
                          .Local
                          .FirstOrDefault(f => f.ID == _item.ID);
-            if (entry != null)
-            {
-                _context.Entry(entry).State = EntityState.Detached;
+                //if (entry != null)
+                //    _context.Entry(entry).State = EntityState.Detached;
+                //_context.Entry(_item).State = EntityState.Modified;
+                return await _context.SaveChangesAsync() > 0;
             }
-            _context.Entry(_item).State = EntityState.Modified;
-            return await _context.SaveChangesAsync() > 0;
+            catch(DbUpdateConcurrencyException ex)
+            {
+                return false;
+            }
         }
         public async Task<bool> AddItemAsync(Booking _item)
         {
@@ -42,8 +44,10 @@ namespace BOG.Lib.Services
             }
             return true;
         }
-        public async Task<Booking> GetItemAsync(int _id) => await _context.Bookings.SingleOrDefaultAsync(x => x.ID == _id);
-        public async Task<IEnumerable<Booking>> GetItemsAsync(bool forceRefresh = false) => await _context.Bookings.ToListAsync();
+        public async Task<Booking> GetItemAsync(int _id) 
+            => await _context.Bookings.SingleOrDefaultAsync(x => x.ID == _id);
+        public async Task<IEnumerable<Booking>> GetItemsAsync(bool forceRefresh = false) 
+            => await _context.Bookings.ToListAsync();
 
     }
 }

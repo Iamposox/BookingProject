@@ -3,8 +3,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using BOG.Domain.Model;
+using BOG.Lib.Services;
 
 namespace BOG.Tests.TestServiceUser
 {
@@ -12,46 +16,60 @@ namespace BOG.Tests.TestServiceUser
     public class CreateReservedServiceTest
     {
         private CreateReservedService service;
-        public CreateReservedServiceTest() { }
+        private PaymentMethodService servicePayment;
+        private CreateCustomerService serviceCreateCustomer;
+        private CustomerService serviceCustomer;
         [TestInitialize]
         public void Init() => service = new CreateReservedService(new TestingContextDB());
-        //[TestCleanup]
-        //public void CleanDb()
-        //{
-        //    var Db = new TestingContextDB();
-        //    Db.Database.EnsureDeleted();
-        //}
-        static object _lock = new object();
+        [TestCleanup]
+        public void CleanDb()
+        {
+            var Db = new TestingContextDB();
+            Db.Database.EnsureDeleted();
+        }
         [TestMethod]
         public void CreateReservedTest()
         {
-            try
+            var context = new TestingContextDB();
+            ConcurrentBag<(bool, Reserved)> bag = new ConcurrentBag<(bool, Reserved)>();
+            List<Reserved> reservedsList = new List<Reserved>();
+            Parallel.For(0, 10, i =>
             {
-                ConcurrentBag<bool> bag = new ConcurrentBag<bool>();
-                Parallel.For(0, 10, async i =>
+                var service = new CreateReservedService(new TestingContextDB());
+                for (var j = 0; j < 1000; j++)
                 {
-                    for (var j = 0; j < 110; j++)
+                    var result = service.CreateReserved(new Domain.Model.Customer()
                     {
-                        var service = new CreateReservedService(new TestingContextDB());
-                        bag.Add(await service.CreateReserved(new Domain.Model.Customer()
-                        {
-                            PaymentMethod = new Domain.Model.PaymentMethod()
-                        }, 2, 1));
+                        PaymentMethod = new Domain.Model.PaymentMethod()
+                    }, 2, 1, new Random().Next(1, 3)).GetAwaiter().GetResult();
+                    if (result.Item2 == true)
+                    {
+                        bag.Add((true, result.Item3));
                     }
-                });
-                foreach (var item in bag)
-                {
-                    Assert.IsTrue(item);
                 }
-            }
-            catch(Exception ex) { string text = ex.Message; }
+            });
+            var list = service.GetReserveds;
         }
-        public async void Crud()
+        [TestMethod]
+        public void CreateReservedOneTest()
         {
-            await service.CreateReserved(new Domain.Model.Customer()
-            {
-                PaymentMethod = new Domain.Model.PaymentMethod()
-            }, 2, 1);
+            var context = new TestingContextDB();
+            servicePayment = new PaymentMethodService(context);
+            service.CreateReserved(customer(context).GetAwaiter().GetResult(),
+            2, 1, new Random().Next(1, 3))
+                .GetAwaiter()
+                .GetResult();
+            var serviceReserved = new ReservedService(new TestingContextDB());
+            var count = serviceReserved.GetItemsAsync().GetAwaiter().GetResult().Count();
+            Assert.AreEqual(2, count);
+        }
+        private async Task<Customer> customer(TestingContextDB testingContext)
+        {
+            serviceCreateCustomer = new CreateCustomerService(testingContext);
+            await serviceCreateCustomer.CreateCustomer("Danya", "Posoxov", 1);
+            serviceCustomer = new CustomerService(testingContext);
+            var customer = await serviceCustomer.GetItemAsync(2);
+            return customer;
         }
     }
 }

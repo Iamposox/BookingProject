@@ -12,7 +12,6 @@ namespace BOG.Tests
     public class PaymentMethodServiceTest
     {
         private PaymentMethodService service;
-        public PaymentMethodServiceTest() { }
         [TestInitialize]
         public void Init() => service = new PaymentMethodService(new TestingContextDB());
         [TestCleanup]
@@ -22,19 +21,19 @@ namespace BOG.Tests
             Db.Database.EnsureDeleted();
         }
         [TestMethod]
-        public void GetCustomerService_Test()
+        public void GetPaymentMethodListService_Test()
         {
             var result = service.GetItemsAsync().GetAwaiter().GetResult();
-            Assert.AreEqual(result.GetType(), new List<PaymentMethod>().GetType());
+            Assert.AreEqual(typeof(List<PaymentMethod>), result.GetType());
         }
         [TestMethod]
-        public void GetOneCustomerService_Test()
+        public void GetOnePaymentMethodService_Test()
         {
             var result = service.GetItemAsync(1).GetAwaiter().GetResult();
-            Assert.AreEqual(result.PaymentName, "Безналичный расчёт");
+            Assert.AreEqual("Безналичный расчёт", result.PaymentName);
         }
         [TestMethod]
-        public void AddCustomerService_Test()
+        public void AddPaymentMethodService_Test()
         {
             PaymentMethod payment = new PaymentMethod() 
             {
@@ -44,10 +43,10 @@ namespace BOG.Tests
             bool item = service.AddItemAsync(payment).GetAwaiter().GetResult();
             Assert.IsTrue(item);
             var count = service.GetItemsAsync().GetAwaiter().GetResult().Count();
-            Assert.AreEqual(count, 3);
+            Assert.AreEqual(3, count);
         }
         [TestMethod]
-        public void UpdateCustomerService_Test()
+        public void UpdatePaymentMethodService_Test()
         {
             var payment  = service.GetItemAsync(1).GetAwaiter().GetResult();
             payment.PaymentName = "NoName";

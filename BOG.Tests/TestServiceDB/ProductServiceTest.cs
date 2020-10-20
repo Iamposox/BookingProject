@@ -12,26 +12,25 @@ namespace BOG.Tests
     public class ProductServiceTest
     {
         private ProductService service;
-        public ProductServiceTest() { }
         [TestInitialize]
         public void Init() => service = new ProductService(new TestingContextDB());
         [TestCleanup]
         public void CleanDb()
         {
             var Db = new TestingContextDB();
-            //Db.Database.EnsureDeleted();
+            Db.Database.EnsureDeleted();
         }
         [TestMethod]
-        public void GetCustomerService_Test()
+        public void GetProductListService_Test()
         {
             var result = service.GetItemsAsync().GetAwaiter().GetResult();
-            Assert.AreEqual(result.GetType(), new List<Product>().GetType());
+            Assert.AreEqual(typeof(List<Product>), result.GetType());
         }
         [TestMethod]
-        public void GetOneCustomerService_Test()
+        public void GetOneProductService_Test()
         {
             var result = service.GetItemAsync(1).GetAwaiter().GetResult();
-            Assert.AreEqual(result.Name, "IPhone 12");
+            Assert.AreEqual("IPhone 12", result.Name);
         }
         [TestMethod]
         public void AddCustomerService_Test()
@@ -43,7 +42,7 @@ namespace BOG.Tests
             bool item = service.AddItemAsync(product).GetAwaiter().GetResult();
             Assert.IsTrue(item);
             var count = service.GetItemsAsync().GetAwaiter().GetResult().Count();
-            Assert.AreEqual(count, 2);
+            Assert.AreEqual(2, count);
         }
         [TestMethod]
         public void UpdateCustomerService_Test()

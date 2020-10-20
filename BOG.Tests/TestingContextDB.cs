@@ -15,12 +15,6 @@ namespace BOG.Tests
             ConnectionString = @"Server=(localdb)\mssqllocaldb;Initial Catalog=TestDB;Database=helloappdb;Trusted_Connection=True;";
             Database.EnsureCreated();
         }
-        public override void Dispose()
-        {
-            //Database.EnsureDeleted();
-            base.Dispose();
-        }
-        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -30,7 +24,7 @@ namespace BOG.Tests
                     ID = 1,
                     Name = "Danya",
                     LastName = "Posox",
-                    PaymentMethodID = 1
+                    PaymentMethodID = 1,
                 });
             modelBuilder.Entity<Reserved>().HasData(
                 new Reserved() 
@@ -39,7 +33,9 @@ namespace BOG.Tests
                     BookingID = 1,
                     CustomerID = 1,
                     AvailableProductID = 1,
-                    TimeOrder = DateTime.Now
+                    TimeOrder = DateTime.Now,
+                    Amount = 2,
+                    ProductID =1
                 });
 
         }

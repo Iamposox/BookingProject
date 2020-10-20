@@ -12,7 +12,6 @@ namespace BOG.Tests
     public class AvailableProductServiceTest
     {
         private AvailableProductService service;
-        public AvailableProductServiceTest() { }
         [TestInitialize]
         public void Init() => service = new AvailableProductService(new TestingContextDB());
         [TestCleanup]
@@ -22,19 +21,19 @@ namespace BOG.Tests
             Db.Database.EnsureDeleted();
         }
         [TestMethod]
-        public void GetCustomerService_Test()
+        public void GetAvailableProductListService_Test()
         {
             var result = service.GetItemsAsync().GetAwaiter().GetResult();
-            Assert.AreEqual(result.GetType(), new List<AvailableProduct>().GetType());
+            Assert.AreEqual(typeof(List<AvailableProduct>),result.GetType());
         }
         [TestMethod]
-        public void GetOneCustomerService_Test()
+        public void GetOneAvailableProductService_Test()
         {
             var result = service.GetItemAsync(1).GetAwaiter().GetResult();
-            Assert.AreEqual(result.Product.Name, "IPhone 12");
+            Assert.AreEqual("IPhone 12", result.Product.Name);
         }
         [TestMethod]
-        public void AddCustomerService_Test()
+        public void AddAvailableProductService_Test()
         {
             AvailableProduct product = new AvailableProduct()
             {
@@ -43,10 +42,10 @@ namespace BOG.Tests
             bool item = service.AddItemAsync(product).GetAwaiter().GetResult();
             Assert.IsTrue(item);
             var count = service.GetItemsAsync().GetAwaiter().GetResult().Count();
-            Assert.AreEqual(count, 2);
+            Assert.AreEqual(2, count);
         }
         [TestMethod]
-        public void UpdateCustomerService_Test()
+        public void UpdateAvailableProductService_Test()
         {
             var product = service.GetItemAsync(1).GetAwaiter().GetResult();
             product.Amount = 15;

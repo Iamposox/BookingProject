@@ -10,24 +10,26 @@ using System.Threading.Tasks;
 
 namespace BOG.Lib.Services
 {
-    public class ProductService:IDataStore<Product>
+    public class ProductService : IDataStore<Product>
     {
         private readonly Context _context;
-        public ProductService(Context context)
-        {
-            _context = context;
-        }
+        public ProductService(Context context) => _context = context;
         public async Task<bool> UpdateItemAsync(Product _item)
         {
-            var entry = _context.Set<Product>()
-                         .Local
-                         .FirstOrDefault(f => f.ID == _item.ID);
-            if (entry != null)
+            try
             {
-                _context.Entry(entry).State = EntityState.Detached;
+                var entry = _context.Set<Product>()
+                             .Local
+                             .FirstOrDefault(f => f.ID == _item.ID);
+                //if (entry != null)
+                //    _context.Entry(entry).State = EntityState.Detached;
+                //_context.Entry(_item).State = EntityState.Modified;
+                return await _context.SaveChangesAsync() > 0;
             }
-            _context.Entry(_item).State = EntityState.Modified;
-            return await _context.SaveChangesAsync() > 0;
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return false;
+            }
         }
         public async Task<bool> AddItemAsync(Product _item)
         {
@@ -42,8 +44,10 @@ namespace BOG.Lib.Services
             }
             return true;
         }
-        public async Task<Product> GetItemAsync(int _id) => await _context.Products.SingleOrDefaultAsync(x => x.ID == _id);
-        public async Task<IEnumerable<Product>> GetItemsAsync(bool forceRefresh = false) => await _context.Products.ToListAsync();
+        public async Task<Product> GetItemAsync(int _id)
+            => await _context.Products.SingleOrDefaultAsync(x => x.ID == _id);
+        public async Task<IEnumerable<Product>> GetItemsAsync(bool forceRefresh = false)
+            => await _context.Products.ToListAsync();
 
     }
 }

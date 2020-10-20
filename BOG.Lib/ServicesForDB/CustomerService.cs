@@ -13,21 +13,22 @@ namespace BOG.Lib.Services
     public class CustomerService : IDataStore<Customer>
     {
         private readonly Context _context;
-        public CustomerService(Context context)
-        {
-            _context = context;
-        }
+        public CustomerService(Context context) => _context = context;
         public async Task<bool> UpdateItemAsync(Customer _item)
         {
-            var entry = _context.Set<Customer>()
-                         .Local
-                         .FirstOrDefault(f => f.ID == _item.ID);
-            if (entry != null)
-            {
-                _context.Entry(entry).State = EntityState.Detached;
+            try {
+                var entry = _context.Set<Customer>()
+                             .Local
+                             .FirstOrDefault(f => f.ID == _item.ID);
+                if (entry != null)
+                    _context.Entry(entry).State = EntityState.Detached;
+                _context.Entry(_item).State = EntityState.Modified;
+                return await _context.SaveChangesAsync() > 0;
             }
-            _context.Entry(_item).State = EntityState.Modified;
-            return await _context.SaveChangesAsync() > 0;
+            catch(DbUpdateConcurrencyException ex)
+            {
+                return false;
+            }
         }
         public async Task<bool> AddItemAsync(Customer _item)
         {
@@ -43,10 +44,11 @@ namespace BOG.Lib.Services
             return true;
         }
         public async Task<Customer> GetItemAsync(int _id) => await _context.Customers
-            .Include(x=>x.PaymentMethod)
+            .Include(x => x.PaymentMethod)
             .SingleOrDefaultAsync(x => x.ID == _id);
-        public async Task<IEnumerable<Customer>> GetItemsAsync(bool forceRefresh = false) => await _context.Customers
-            .Include(x=>x.PaymentMethod)
+        public async Task<IEnumerable<Customer>> GetItemsAsync(bool forceRefresh = false)
+            => await _context.Customers
+            .Include(x => x.PaymentMethod)
             .ToListAsync();
 
     }

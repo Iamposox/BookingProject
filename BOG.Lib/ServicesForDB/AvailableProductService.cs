@@ -20,15 +20,22 @@ namespace BOG.Lib.Services
         }
         public async Task<bool> UpdateItemAsync(AvailableProduct _item)
         {
-            var entry = _context.Set<AvailableProduct>()
+            try
+            {
+                var entry = _context.Set<AvailableProduct>()
                          .Local
                          .FirstOrDefault(f => f.ID == _item.ID);
-            if (entry != null)
-            {
-                _context.Entry(entry).State = EntityState.Detached;
+                //if (entry != null)
+                //{
+                //    _context.Entry(entry).State = EntityState.Detached;
+                //}
+                //_context.Entry(_item).State = EntityState.Modified;
+                return await _context.SaveChangesAsync() > 0;
             }
-            _context.Entry(_item).State = EntityState.Modified;
-            return await _context.SaveChangesAsync() > 0;
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return false;
+            }
         }
         public async Task<bool> AddItemAsync(AvailableProduct _item)
         {
@@ -45,10 +52,17 @@ namespace BOG.Lib.Services
         }
         public async Task<AvailableProduct> GetItemAsync(int _id)
         {
+            try
+            {
                 var item = await _context.AvailableProduct
                 .Include(x => x.Product)
                 .SingleOrDefaultAsync(x => x.ID == _id);
                 return item;
+            }
+            catch (DbUpdateConcurrencyException exc) 
+            {
+                return null;
+            }
         }
         public async Task<IEnumerable<AvailableProduct>> GetItemsAsync(bool forceRefresh = false)
             => await _context.AvailableProduct

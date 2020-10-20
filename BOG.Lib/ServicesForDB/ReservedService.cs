@@ -13,21 +13,20 @@ namespace BOG.Lib.Services
     public class ReservedService : IDataStore<Reserved>
     {
         private readonly Context _context;
-        public ReservedService(Context context)
-        {
-            _context = context;
-        }
+        public ReservedService(Context context) => _context = context;
         public async Task<bool> UpdateItemAsync(Reserved _item)
         {
-            var entry = _context.Set<Reserved>()
-                         .Local
-                         .FirstOrDefault(f => f.ID == _item.ID);
-            if (entry != null)
+            try
             {
-                _context.Entry(entry).State = EntityState.Detached;
+                var entry = _context.Set<Reserved>()
+                             .Local
+                             .FirstOrDefault(f => f.ID == _item.ID);
+                return await _context.SaveChangesAsync() > 0;
             }
-            _context.Entry(_item).State = EntityState.Modified;
-            return await _context.SaveChangesAsync() > 0;
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return false;
+            }
         }
         public async Task<bool> AddItemAsync(Reserved _item)
         {
@@ -42,15 +41,17 @@ namespace BOG.Lib.Services
             }
             return true;
         }
-        public async Task<Reserved> GetItemAsync(int _id) => await _context.Reserveds
-            .Include(x=>x.Booking)
-            .Include(x=>x.Customer.PaymentMethod)
-            .Include(x=>x.AvailableProduct.Product)
-            .SingleOrDefaultAsync(x => x.ID == _id);
-        public async Task<IEnumerable<Reserved>> GetItemsAsync(bool forceRefresh = false) => await _context.Reserveds
-            .Include(x=>x.Booking)
+        public async Task<Reserved> GetItemAsync(int _id)
+            => await _context.Reserveds
+            .Include(x => x.Booking)
             .Include(x => x.Customer.PaymentMethod)
-            .Include(x => x.AvailableProduct.Product)
+            .Include(x => x.Product)
+            .SingleOrDefaultAsync(x => x.ID == _id);
+        public async Task<IEnumerable<Reserved>> GetItemsAsync(bool forceRefresh = false)
+            => await _context.Reserveds
+            .Include(x => x.Booking)
+            .Include(x => x.Customer.PaymentMethod)
+            .Include(x => x.Product)
             .ToListAsync();
     }
 }

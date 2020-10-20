@@ -10,7 +10,7 @@ namespace BOG.Lib.ServiceForWorkWithUsers
 {
     public class CreateCustomerService
     {
-        private Customer customer = new Customer();
+        private Customer customer;
         private readonly IDataStore<PaymentMethod> dataStorePayment;
         private readonly IDataStore<Customer> dataStoreCustomer;
         public CreateCustomerService(Context context) 
@@ -20,8 +20,11 @@ namespace BOG.Lib.ServiceForWorkWithUsers
         }
         public async Task<bool> CreateCustomer(string name,string lastname, int paymentMethodID)
         {
-            customer.Name = name;
-            customer.LastName = lastname;
+            customer = new Customer()
+            {
+                Name = name,
+                LastName = lastname
+            };
             var payment = await dataStorePayment.GetItemAsync(paymentMethodID);
             customer.PaymentMethod = payment;
             customer.PaymentMethodID = payment.ID;

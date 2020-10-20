@@ -11,7 +11,6 @@ namespace BOG.Tests.TestServiceUser
     public class CreateCustomerServiceTest
     {
         private CreateCustomerService service;
-        public CreateCustomerServiceTest() { }
         [TestInitialize]
         public void Init() => service = new CreateCustomerService(new TestingContextDB());
         [TestCleanup]
@@ -21,9 +20,8 @@ namespace BOG.Tests.TestServiceUser
             Db.Database.EnsureDeleted();
         }
         [TestMethod]
-        public void CreateCustomerTest() 
-        {
-            Assert.IsTrue(service.CreateCustomer("Data", "Base", 1).GetAwaiter().GetResult());
-        }
+        public void CreateCustomerTest() => Assert.IsTrue(service.CreateCustomer("Data", "Base", 1)
+                                                                 .GetAwaiter()
+                                                                 .GetResult());
     }
 }

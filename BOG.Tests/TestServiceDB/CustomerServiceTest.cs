@@ -12,7 +12,6 @@ namespace BOG.Tests
     public class CustomerServiceTest
     {
         private CustomerService service;
-        public CustomerServiceTest() { }
         [TestInitialize]
         public void Init() => service = new CustomerService(new TestingContextDB());
         [TestCleanup]
@@ -22,16 +21,16 @@ namespace BOG.Tests
             Db.Database.EnsureDeleted();
         }
         [TestMethod]
-        public void GetCustomerService_Test()
+        public void GetCustomerListService_Test()
         {
             var result = service.GetItemsAsync().GetAwaiter().GetResult();
-            Assert.AreEqual(result.GetType(), new List<Customer>().GetType());
+            Assert.AreEqual(typeof(List<Customer>),result.GetType());
         }
         [TestMethod]
         public void GetOneCustomerService_Test()
         {
             var result = service.GetItemAsync(1).GetAwaiter().GetResult();
-            Assert.AreEqual(result.Name, "Danya");
+            Assert.AreEqual("Danya", result.Name);
         }
         [TestMethod]
         public void AddCustomerService_Test() 
@@ -45,7 +44,7 @@ namespace BOG.Tests
             bool item = service.AddItemAsync(customer).GetAwaiter().GetResult();
             Assert.IsTrue(item);
             var count = service.GetItemsAsync().GetAwaiter().GetResult().Count();
-            Assert.AreEqual(count,2);
+            Assert.AreEqual(2, count);
         }
         [TestMethod]
         public void UpdateCustomerService_Test()
