@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -49,7 +50,8 @@ namespace BOG.Tests.TestServiceUser
                 }
             });
             var service = new ReservedService(new Context());
-            var list = service.GetItemsAsync();
+            var list = service.GetItemsAsync().GetAwaiter().GetResult();
+            Assert.AreEqual(list.Count() - 1, bag.Count);
         }
         private async Task<Customer> customer(TestingContextDB testingContext)
         {

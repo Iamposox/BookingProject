@@ -32,7 +32,6 @@ namespace BOG.Tests
                     ID = 1,
                     BookingID = 1,
                     CustomerID = 1,
-                    AvailableProductID = 1,
                     TimeOrder = DateTime.Now,
                     Amount = 2,
                     ProductID =1

@@ -16,7 +16,6 @@ namespace BOG.Domain.Model
         public int Amount { get; set; }
         public int BookingID { get; set; }
         public int CustomerID { get; set; }
-        public int AvailableProductID { get; set; }
         [Timestamp]
         public byte[] Timestamp { get; set; }
     }

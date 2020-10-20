@@ -49,9 +49,9 @@ namespace BOG.Lib.Services
             .SingleOrDefaultAsync(x => x.ID == _id);
         public async Task<IEnumerable<Reserved>> GetItemsAsync(bool forceRefresh = false)
             => await _context.Reserveds
-            .Include(x => x.Booking)
-            .Include(x => x.Customer.PaymentMethod)
-            .Include(x => x.Product)
+            .Include(x=>x.Booking)
+            .Include(x=>x.Customer)
+            .Include(x=>x.Product)
             .ToListAsync();
     }
 }
