@@ -21,9 +21,6 @@ namespace BOG.Lib.Services
                 var entry = _context.Set<Booking>()
                          .Local
                          .FirstOrDefault(f => f.ID == _item.ID);
-                //if (entry != null)
-                //    _context.Entry(entry).State = EntityState.Detached;
-                //_context.Entry(_item).State = EntityState.Modified;
                 return await _context.SaveChangesAsync() > 0;
             }
             catch(DbUpdateConcurrencyException ex)
@@ -44,8 +41,17 @@ namespace BOG.Lib.Services
             }
             return true;
         }
-        public async Task<Booking> GetItemAsync(int _id) 
-            => await _context.Bookings.SingleOrDefaultAsync(x => x.ID == _id);
+        public async Task<Booking> GetItemAsync(int _id)
+        {
+            try 
+            {
+                return await _context.Bookings.SingleOrDefaultAsync(x => x.ID == _id); 
+            }
+            catch
+            {
+                return null;
+            }
+        }
         public async Task<IEnumerable<Booking>> GetItemsAsync(bool forceRefresh = false) 
             => await _context.Bookings.ToListAsync();
 

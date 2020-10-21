@@ -13,23 +13,18 @@ namespace BOG.Lib.Services
     public class AvailableProductService : IDataStore<AvailableProduct>
     {
         private readonly Context _context;
-        static object locker = new object();
-        public AvailableProductService(Context context)
-        {
-            _context = context;
-        }
+        public AvailableProductService(Context context) => _context = context;
+        
         public async Task<bool> UpdateItemAsync(AvailableProduct _item)
         {
             try
             {
-                var entry = _context.Set<AvailableProduct>()
-                         .Local
-                         .FirstOrDefault(f => f.ID == _item.ID);
-                //if (entry != null)
-                //{
-                //    _context.Entry(entry).State = EntityState.Detached;
-                //}
-                //_context.Entry(_item).State = EntityState.Modified;
+                var entry = _context.Set<Customer>()
+                .Local
+                .FirstOrDefault(f => f.ID == _item.ID);
+                if (entry != null)
+                    _context.Entry(entry).State = EntityState.Detached;
+                _context.Entry(_item).State = EntityState.Modified;
                 return await _context.SaveChangesAsync() > 0;
             }
             catch (DbUpdateConcurrencyException ex)
