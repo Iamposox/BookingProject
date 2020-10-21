@@ -28,48 +28,29 @@ namespace BOG.Tests.TestServiceUser
             Db.Database.EnsureDeleted();
         }
         [TestMethod]
-        public void CreateReservedTest()
-        {
-            var context = new TestingContextDB();
-            ConcurrentBag<(bool, Reserved)> bag = new ConcurrentBag<(bool, Reserved)>();
-            List<Reserved> reservedsList = new List<Reserved>();
-            Parallel.For(0, 10, i =>
-            {
-                var service = new CreateReservedService(new TestingContextDB());
-                for (var j = 0; j < 1000; j++)
-                {
-                    var result = service.CreateReserved(new Domain.Model.Customer()
-                    {
-                        PaymentMethod = new Domain.Model.PaymentMethod()
-                    }, 2, 1, new Random().Next(1, 3)).GetAwaiter().GetResult();
-                    if (result.Item2 == true)
-                    {
-                        bag.Add((true, result.Item3));
-                    }
-                }
-            });
-            var list = service.GetReserveds;
-        }
-        [TestMethod]
         public void CreateReservedOneTest()
         {
             var context = new TestingContextDB();
             servicePayment = new PaymentMethodService(context);
             service.CreateReserved(customer(context).GetAwaiter().GetResult(),
-            2, 1, new Random().Next(1, 3))
+            1, new Random().Next(1, 3))
                 .GetAwaiter()
                 .GetResult();
             var serviceReserved = new ReservedService(new TestingContextDB());
             var count = serviceReserved.GetItemsAsync().GetAwaiter().GetResult().Count();
             Assert.AreEqual(2, count);
         }
+        /// <summary>
+        /// Create customer for CreateReservedTest
+        /// </summary>
+        /// <param name="testingContext">Our Test database</param>
+        /// <returns>Created customer</returns>
         private async Task<Customer> customer(TestingContextDB testingContext)
         {
             serviceCreateCustomer = new CreateCustomerService(testingContext);
             await serviceCreateCustomer.CreateCustomer("Danya", "Posoxov", 1);
             serviceCustomer = new CustomerService(testingContext);
-            var customer = await serviceCustomer.GetItemAsync(2);
-            return customer;
+            return await serviceCustomer.GetItemAsync(2);
         }
     }
 }

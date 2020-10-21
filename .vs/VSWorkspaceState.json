@@ -1,6 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\BOG.Tests",
+    "\\BOG.Tests\\TestServiceUser"
   ],
+  "SelectedNode": "\\BookingOfGoods.sln",
   "PreviewInSolutionExplorer": false
 }

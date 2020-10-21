@@ -31,7 +31,7 @@ namespace BOG.Tests.TestServiceUser
         [TestMethod]
         public void FinalMultiThreadedTest()
         {
-            ConcurrentBag<(bool, Reserved)> bag = new ConcurrentBag<(bool, Reserved)>();
+            ConcurrentBag<Reserved> bag = new ConcurrentBag<Reserved>();
             int AvailableID = 1;
             List<Reserved> reservedsList = new List<Reserved>();
             Parallel.For(0, 10, i =>
@@ -44,13 +44,11 @@ namespace BOG.Tests.TestServiceUser
                     var product = availableProduct.GetItemAsync(1).GetAwaiter().GetResult();
                     if (product != null && product.Amount < 1)
                     {
-                        var result = service.CreateReserved(customer(context).GetAwaiter().GetResult(), 2, AvailableID, new Random().Next(1, 3))
+                        var result = service.CreateReserved(Customer(context).GetAwaiter().GetResult(), AvailableID, new Random().Next(1, 3))
                         .GetAwaiter()
                         .GetResult();
-                        if (result.Item2 == true)
-                        {
-                            bag.Add((true, result.Item3));
-                        }
+                        if (result != null)
+                            bag.Add(result);
                     }
                 }
             });
@@ -58,7 +56,12 @@ namespace BOG.Tests.TestServiceUser
             var list = service.GetItemsAsync().GetAwaiter().GetResult();
             Assert.AreEqual(list.Count() - 1, bag.Count);
         }
-        private async Task<Customer> customer(TestingContextDB testingContext)
+        /// <summary>
+        /// Create customer for FinalMultIThreadedTest
+        /// </summary>
+        /// <param name="testingContext">Context on Testing database</param>
+        /// <returns>Created customer</returns>
+        private async Task<Customer> Customer(TestingContextDB testingContext)
         {
             serviceCreateCustomer = new CreateCustomerService(testingContext);
             await serviceCreateCustomer.CreateCustomer("Danya", "Posoxov", 1);

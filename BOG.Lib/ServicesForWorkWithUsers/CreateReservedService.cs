@@ -3,6 +3,7 @@ using BOG.Domain.Model;
 using BOG.Lib.Interface;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,14 +30,22 @@ namespace BOG.Lib.ServiceForWorkWithUsers
         }
         public List<Reserved> GetReserveds { get => reservedList; }
         public Reserved GetReserved { get => reserved; }
-        public async Task<(string,bool, Reserved)> CreateReserved(Customer customer, int bookingID, int availableProductID, int amount)
+        /// <summary>
+        /// Method for creating a single reservation in the database
+        /// </summary>
+        /// <param name="customer">The client that accesses the database</param>
+        /// <param name="availableProductID">The ID of available product</param>
+        /// <param name="amount">Quantity of the desired product</param>
+        /// <returns>Return created reserving on database</returns>
+        public async Task<Reserved> CreateReserved(Customer customer, int availableProductID, int amount)
         {
             product = await dataStoreAvailableProduct.GetItemAsync(availableProductID);
             if (product != null)
             {
                 if (product.Amount > 0 && (product.Amount - amount) > 0)
                 {
-                    var booking = await dataStoreBooking.GetItemAsync(bookingID);
+                    var bookingList = await dataStoreBooking.GetItemsAsync();
+                    var booking = bookingList.Where(x => x.Statuc == true).Single();
                     reserved = new Reserved()
                     {
                         Product = product.Product,
@@ -47,19 +56,19 @@ namespace BOG.Lib.ServiceForWorkWithUsers
                     };
                     product.Amount -= amount;
                     if (!await dataStoreAvailableProduct.UpdateItemAsync(product))
-                        return ($"Товар не зарезервирован", false, null);
+                        return null;
                     if (await dataStorePayment.UpdateItemAsync(reserved.Customer.PaymentMethod)
                         && await dataStoreCustomer.UpdateItemAsync(reserved.Customer)
                         && await dataStoreReserved.AddItemAsync(reserved))
                     {
                         reservedList.Add(reserved);
-                        return ($"Товар зарезервирован {reserved.TimeOrder}", true, reserved);
+                        return reserved;
                     }
-                    else return ($"Товар незарезервирован", false, null);
+                    else return null;
                 }
-                else return ($"Товар незарезервирован", false, null);
+                else return null;
             }
-            else return ($"Товар незарезервирован", false, null);
+            else return null;
         }
     }
 }

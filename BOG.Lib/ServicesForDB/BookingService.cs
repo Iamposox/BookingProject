@@ -18,9 +18,6 @@ namespace BOG.Lib.Services
         {
             try
             {
-                var entry = _context.Set<Booking>()
-                         .Local
-                         .FirstOrDefault(f => f.ID == _item.ID);
                 return await _context.SaveChangesAsync() > 0;
             }
             catch(DbUpdateConcurrencyException ex)
