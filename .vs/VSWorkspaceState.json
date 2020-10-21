@@ -1,9 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\BOG.Tests",
+    "\\BOG.Domain",
+    "\\BOG.Lib",
     "\\BOG.Tests\\TestServiceUser"
   ],
-  "SelectedNode": "\\BOG.Tests\\TestServiceUser\\CreateReservedServiceTest.cs",
+  "SelectedNode": "\\BookingOfGoods.sln",
   "PreviewInSolutionExplorer": false
 }
