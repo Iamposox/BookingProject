@@ -27,7 +27,7 @@ namespace BOG.Lib.ServiceForWorkWithUsers
             };
             var payment = await dataStorePayment.GetItemAsync(paymentMethodID);
             customer.PaymentMethod = payment;
-            customer.PaymentMethodID = payment.ID;
+            //customer.PaymentMethodID = payment.ID;
             return await dataStoreCustomer.AddItemAsync(customer);
         }
     }

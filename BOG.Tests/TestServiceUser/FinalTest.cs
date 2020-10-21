@@ -2,6 +2,8 @@
 using BOG.Domain.Model;
 using BOG.Lib.ServiceForWorkWithUsers;
 using BOG.Lib.Services;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
@@ -40,12 +42,15 @@ namespace BOG.Tests.TestServiceUser
                 for (var j = 0; j < 1000; j++)
                 {
                     var product = availableProduct.GetItemAsync(1).GetAwaiter().GetResult();
-                    var result = product.Amount > 1 ? service.CreateReserved(customer(context).GetAwaiter().GetResult(), 2, AvailableID, new Random().Next(1, 3))
-                    .GetAwaiter()
-                    .GetResult() : (null, false,null);
-                    if (result.Item2 == true)
+                    if (product != null && product.Amount < 1)
                     {
-                        bag.Add((true, result.Item3));
+                        var result = service.CreateReserved(customer(context).GetAwaiter().GetResult(), 2, AvailableID, new Random().Next(1, 3))
+                        .GetAwaiter()
+                        .GetResult();
+                        if (result.Item2 == true)
+                        {
+                            bag.Add((true, result.Item3));
+                        }
                     }
                 }
             });

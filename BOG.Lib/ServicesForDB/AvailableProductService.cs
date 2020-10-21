@@ -54,10 +54,9 @@ namespace BOG.Lib.Services
         {
             try
             {
-                var item = await _context.AvailableProduct
+                return await _context.AvailableProduct
                 .Include(x => x.Product)
                 .SingleOrDefaultAsync(x => x.ID == _id);
-                return item;
             }
             catch (DbUpdateConcurrencyException exc) 
             {

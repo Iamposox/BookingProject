@@ -16,7 +16,8 @@ namespace BOG.Lib.Services
         public CustomerService(Context context) => _context = context;
         public async Task<bool> UpdateItemAsync(Customer _item)
         {
-            try {
+            try
+            {
                 var entry = _context.Set<Customer>()
                              .Local
                              .FirstOrDefault(f => f.ID == _item.ID);
@@ -25,7 +26,7 @@ namespace BOG.Lib.Services
                 _context.Entry(_item).State = EntityState.Modified;
                 return await _context.SaveChangesAsync() > 0;
             }
-            catch(DbUpdateConcurrencyException ex)
+            catch (DbUpdateConcurrencyException ex)
             {
                 return false;
             }
@@ -43,9 +44,19 @@ namespace BOG.Lib.Services
             }
             return true;
         }
-        public async Task<Customer> GetItemAsync(int _id) => await _context.Customers
-            .Include(x => x.PaymentMethod)
-            .SingleOrDefaultAsync(x => x.ID == _id);
+        public async Task<Customer> GetItemAsync(int _id)
+        {
+            try
+            {
+                return await _context.Customers
+                .Include(x => x.PaymentMethod)
+                .SingleOrDefaultAsync(x => x.ID == _id);
+            }
+            catch
+            {
+                return null;
+            }
+        }
         public async Task<IEnumerable<Customer>> GetItemsAsync(bool forceRefresh = false)
             => await _context.Customers
             .Include(x => x.PaymentMethod)
