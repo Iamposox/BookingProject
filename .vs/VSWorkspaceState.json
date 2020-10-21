@@ -4,6 +4,6 @@
     "\\BOG.Tests",
     "\\BOG.Tests\\TestServiceUser"
   ],
-  "SelectedNode": "\\BookingOfGoods.sln",
+  "SelectedNode": "\\BOG.Tests\\TestServiceUser\\CreateReservedServiceTest.cs",
   "PreviewInSolutionExplorer": false
 }
