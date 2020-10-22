@@ -28,12 +28,14 @@ namespace BOG.Tests.TestServiceUser
             Db.Database.EnsureDeleted();
         }
         [TestMethod]
-        public void CreateReservedOneTest()
+        public async Task CreateReservedOneTest()
         {
             var context = new TestingContextDB();
             servicePayment = new PaymentMethodService(context);
-            service.CreateReserved(customer(context).GetAwaiter().GetResult(),
-            1, new Random().Next(1, 3))
+            var serviceProduct = new AvailableProductService(context);
+            var availableProduct = await serviceProduct.GetItemAsync(1);
+            service.CreateReservedAsync(customer(context).GetAwaiter().GetResult(),availableProduct
+            , new Random().Next(1, 3))
                 .GetAwaiter()
                 .GetResult();
             var serviceReserved = new ReservedService(new TestingContextDB());

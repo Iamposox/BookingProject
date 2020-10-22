@@ -3,8 +3,8 @@
     "",
     "\\BOG.Domain",
     "\\BOG.Lib",
-    "\\BOG.Tests\\TestServiceUser"
+    "\\BOG.Tests"
   ],
-  "SelectedNode": "\\BookingOfGoods.sln",
+  "SelectedNode": "\\BOG.Tests\\TestServiceUser",
   "PreviewInSolutionExplorer": false
 }

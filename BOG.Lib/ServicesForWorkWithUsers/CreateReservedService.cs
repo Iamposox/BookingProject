@@ -13,9 +13,8 @@ namespace BOG.Lib.ServiceForWorkWithUsers
     {
         private Reserved reserved;
         private List<Reserved> reservedList;
-        private AvailableProduct product;
         private readonly IDataStore<Booking> dataStoreBooking;
-        private readonly IDataStore<AvailableProduct> dataStoreAvailableProduct;
+        private readonly IDataStore<Product> dataStoreProduct;
         private readonly IDataStore<Reserved> dataStoreReserved;
         private readonly IDataStore<PaymentMethod> dataStorePayment;
         private readonly IDataStore<Customer> dataStoreCustomer;
@@ -23,7 +22,7 @@ namespace BOG.Lib.ServiceForWorkWithUsers
         {
             reservedList = new List<Reserved>();
             dataStoreBooking = new Services.BookingService(context);
-            dataStoreAvailableProduct = new Services.AvailableProductService(context);
+            dataStoreProduct = new Services.ProductService(context);
             dataStoreReserved = new Services.ReservedService(context);
             dataStorePayment = new Services.PaymentMethodService(context);
             dataStoreCustomer = new Services.CustomerService(context);
@@ -37,36 +36,55 @@ namespace BOG.Lib.ServiceForWorkWithUsers
         /// <param name="availableProductID">The ID of available product</param>
         /// <param name="amount">Quantity of the desired product</param>
         /// <returns>Return created reserving on database</returns>
-        public async Task<Reserved> CreateReserved(Customer customer, int availableProductID, int amount)
+        public async Task<Reserved> CreateReserved(Customer customer, AvailableProduct availableProduct, int amount)
         {
-            product = await dataStoreAvailableProduct.GetItemAsync(availableProductID);
-            if (product != null)
+            if ((availableProduct.Amount - amount) >= 0)
             {
-                if (product.Amount > 0 && (product.Amount - amount) > 0)
+                var bookingList = await dataStoreBooking.GetItemsAsync();
+                var booking = bookingList.Where(x => x.Statuc == true).Single();
+                reserved = new Reserved()
                 {
-                    var bookingList = await dataStoreBooking.GetItemsAsync();
-                    var booking = bookingList.Where(x => x.Statuc == true).Single();
-                    reserved = new Reserved()
-                    {
-                        Product = product.Product,
-                        Amount = amount,
-                        Booking = booking,
-                        Customer = customer,
-                        TimeOrder = DateTime.Now
-                    };
-                    product.Amount -= amount;
-                    if (!await dataStoreAvailableProduct.UpdateItemAsync(product))
-                        return null;
-                    if (await dataStorePayment.UpdateItemAsync(reserved.Customer.PaymentMethod)
-                        && await dataStoreCustomer.UpdateItemAsync(reserved.Customer)
-                        && await dataStoreReserved.AddItemAsync(reserved))
-                    {
-                        reservedList.Add(reserved);
-                        return reserved;
-                    }
-                    else return null;
+                    Product = availableProduct.Product,
+                    Amount = amount,
+                    Booking = booking,
+                    Customer = customer,
+                    TimeOrder = DateTime.Now
+                };
+                availableProduct.Amount -= amount;
+                //if (!await dataStoreAvailableProduct.UpdateItemAsync(availableProduct))
+                //    return null;
+                //if (!await dataStoreBooking.UpdateItemAsync(booking)) 
+                //    return null;
+                if (await dataStorePayment.UpdateItemAsync(reserved.Customer.PaymentMethod)
+                    && await dataStoreCustomer.UpdateItemAsync(reserved.Customer)
+                    && await dataStoreReserved.AddItemAsync(reserved))
+                {
+                    reservedList.Add(reserved);
+                    return reserved;
                 }
                 else return null;
+            }
+            else return null;
+        }
+        public async Task<Reserved> CreateReservedAsync(Customer customer, AvailableProduct availableProduct, int amount)
+        {
+            var bookingList = await dataStoreBooking.GetItemsAsync();
+            var booking = bookingList.Where(x => x.Statuc == true).Single();
+            var product = await dataStoreProduct.GetItemAsync(availableProduct.ID);
+            reserved = new Reserved()
+            {
+                Product = product,
+                Amount = amount,
+                Booking = booking,
+                Customer = customer,
+                TimeOrder = DateTime.Now
+            };
+            if (await dataStorePayment.UpdateItemAsync(reserved.Customer.PaymentMethod)
+                && await dataStoreCustomer.UpdateItemAsync(reserved.Customer)
+                && await dataStoreReserved.AddItemAsync(reserved))
+            {
+                reservedList.Add(reserved);
+                return reserved;
             }
             else return null;
         }

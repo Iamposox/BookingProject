@@ -32,7 +32,6 @@ namespace BOG.Tests.TestServiceUser
         public void FinalMultiThreadedTest()
         {
             ConcurrentBag<Reserved> bag = new ConcurrentBag<Reserved>();
-            int AvailableID = 1;
             List<Reserved> reservedsList = new List<Reserved>();
             Parallel.For(0, 10, i =>
             {
@@ -41,10 +40,12 @@ namespace BOG.Tests.TestServiceUser
                 var availableProduct = new AvailableProductService(context);
                 for (var j = 0; j < 1000; j++)
                 {
+                    var amountOfRandom = new Random().Next(1, 3);
                     var product = availableProduct.GetItemAsync(1).GetAwaiter().GetResult();
-                    if (product != null && product.Amount < 1)
+                    if (product != null && (product.Amount-amountOfRandom) >= 0)
                     {
-                        var result = service.CreateReserved(Customer(context).GetAwaiter().GetResult(), AvailableID, new Random().Next(1, 3))
+                        product.Amount -= amountOfRandom;
+                        var result = service.CreateReservedAsync(Customer(context).GetAwaiter().GetResult(), product, amountOfRandom)
                         .GetAwaiter()
                         .GetResult();
                         if (result != null)
@@ -52,9 +53,7 @@ namespace BOG.Tests.TestServiceUser
                     }
                 }
             });
-            var service = new ReservedService(new Context());
-            var list = service.GetItemsAsync().GetAwaiter().GetResult();
-            Assert.AreEqual(list.Count() - 1, bag.Count);
+            Assert.IsTrue(bag.Count>0);
         }
         /// <summary>
         /// Create customer for FinalMultIThreadedTest
